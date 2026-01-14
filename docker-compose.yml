@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: nestjs-app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MONGODB_URI=mongodb://mongo:27017/products
+      - SWAGGER_ENABLED=true
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      - mongo
+    restart: unless-stopped
+    networks:
+      - nestjs-network
+
+  mongo:
+    image: mongo:7
+    container_name: nestjs-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: unless-stopped
+    networks:
+      - nestjs-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo-data:
+
+networks:
+  nestjs-network:
+    driver: bridge

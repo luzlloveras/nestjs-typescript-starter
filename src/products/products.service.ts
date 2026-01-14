@@ -1,6 +1,5 @@
-/* eslint-disable prettier/prettier */
 import { Model } from 'mongoose';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product';
@@ -13,11 +12,20 @@ export class ProductsService {
   ) {}
 
   async findAll(): Promise<Product[]> {
-    return this.productModel.find().lean();
+    return this.productModel.find().exec();
   }
 
   async findOne(id: string): Promise<Product> {
-    return this.productModel.findOne({ _id: id }).lean();
+    if (!this.isValidObjectId(id)) {
+      throw new BadRequestException('Invalid product ID format');
+    }
+
+    const product = await this.productModel.findById(id).exec();
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    return product;
   }
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -25,14 +33,35 @@ export class ProductsService {
     return createdProduct.save();
   }
 
-  async update(
-    id: string,
-    updateProductDto: UpdateProductDto,
-  ): Promise<Product> {
-    return this.productModel.updateOne({ _id: id }, updateProductDto).lean();
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
+    if (!this.isValidObjectId(id)) {
+      throw new BadRequestException('Invalid product ID format');
+    }
+
+    const updatedProduct = await this.productModel
+      .findByIdAndUpdate(id, updateProductDto, { new: true })
+      .exec();
+
+    if (!updatedProduct) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    return updatedProduct;
   }
 
-  async remove(id: string): Promise<Product> {
-    return this.productModel.deleteOne({ _id: id }).lean();
+  async remove(id: string): Promise<void> {
+    if (!this.isValidObjectId(id)) {
+      throw new BadRequestException('Invalid product ID format');
+    }
+
+    const result = await this.productModel.findByIdAndDelete(id).exec();
+
+    if (!result) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+  }
+
+  private isValidObjectId(id: string): boolean {
+    return /^[0-9a-fA-F]{24}$/.test(id);
   }
 }

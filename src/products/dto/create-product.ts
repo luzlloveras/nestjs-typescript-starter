@@ -1,12 +1,49 @@
-/* eslint-disable prettier/prettier */
+import { IsString, IsNumber, IsArray, IsObject, IsNotEmpty, Min, ArrayMinSize, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
+
+class MeasurementsDto {
+  @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  height!: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  width!: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  weight!: number;
+}
+
 export class CreateProductDto {
-    readonly name: string;
-    readonly price: number;
-    readonly currency: string;
-    readonly categories: string[];
-    readonly measurements: {
-      height: number;
-      width: number;
-      weight: number;
-    };
-  }
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  name!: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  price!: number;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  currency!: string;
+
+  @ApiProperty()
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsString({ each: true })
+  categories!: string[];
+
+  @ApiProperty({ type: MeasurementsDto })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => MeasurementsDto)
+  measurements!: MeasurementsDto;
+}

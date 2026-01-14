@@ -1,13 +1,5 @@
-/* eslint-disable prettier/prettier */
-export class UpdateProductDto {
-    readonly name?: string;
-    readonly price?: number;
-    readonly currency?: string;
-    readonly categories?: string[];
-    readonly measurements?: {
-      height?: number;
-      width?: number;
-      weight?: number;
-    };
-  }
+import { PartialType } from '@nestjs/swagger';
+import { CreateProductDto } from './create-product';
+
+export class UpdateProductDto extends PartialType(CreateProductDto) {}
 

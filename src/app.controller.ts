@@ -1,91 +1,105 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Body, Param, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  BadRequestException,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { AppService } from './app.service';
 import { firstValueFrom } from 'rxjs';
 
+interface User {
+  id: number;
+  name: string;
+  surname: string;
+  age: number;
+}
+
+interface CreateUserDto {
+  name: string;
+  surname: string;
+  age: number;
+}
+
+@ApiTags('app')
 @Controller()
+@UseGuards(ThrottlerGuard)
 export class AppController {
-  users: any;
-  counter: number;
-  
-  constructor(private readonly appService: AppService) {
-    this.counter = 0;
-    this.users = [];
-  }
-  /*
-  @Get('test')
+  private users: User[] = [];
+  private counter = 0;
+
+  constructor(private readonly appService: AppService) {}
+
+  @Get()
   getHello(): string {
     return this.appService.getHello();
   }
 
-  @Get('/api/items')
-  getItems(@Query()queries): any {
-    const page = queries.page;
-    const items = [1,2,3,4,5,6,7,8,9,10];
-    return items[page - 1];
-  }
-
-
-  @Get('/api/items/:id')
-  getParam(@Param() params): any {
-    const items = [
-      { id: 1 , name: "item 1"},
-      { id: 2 , name: "item 2"},
-      { id: 3 , name: "item 3"},
-    ];
-    const searchId = params.id;
-    const item = items.find((item) => item.id == searchId);
-    return item;
-  }
-   */
-  @Get('/api/users')
-  getUsers(): any {
+  @Get('users')
+  getUsers(): User[] {
     return this.users;
   }
 
-  @Get('/api/users/qty')
-  getUsersQty(): any {
-    return this.users.lenght;
+  @Get('users/qty')
+  getUsersQty(): { count: number } {
+    return { count: this.users.length };
   }
- 
 
-  @Get('/api/users/:id')
-  getUsersById(@Param('id') id): any {
-    console.log(this.users.find((user) => this.users.id === Number(id)));
-    return this.users.find((user) => this.users.id === Number(id));
-  }
- 
-  @Post('/api/users')
-  createUser(@Body() userData: any) {
-    const {name, surname, age} = userData
-    if(!userData?.name || !userData?.surname || !userData?.age ){
-      throw new BadRequestException('Invalid data');
+  @Get('users/:id')
+  getUsersById(@Param('id') id: string): User {
+    const userId = parseInt(id, 10);
+    if (isNaN(userId)) {
+      throw new BadRequestException('Invalid user ID');
     }
-    const userLenght = this.users.lenght;
-    
+
+    const user = this.users.find((u) => u.id === userId);
+    if (!user) {
+      throw new BadRequestException(`User with ID ${id} not found`);
+    }
+    return user;
+  }
+
+  @Post('users')
+  @HttpCode(HttpStatus.CREATED)
+  createUser(@Body() userData: CreateUserDto): User {
+    const { name, surname, age } = userData;
+
+    if (!name || !surname || !age) {
+      throw new BadRequestException('Invalid data: name, surname, and age are required');
+    }
+
+    if (typeof age !== 'number' || age < 0) {
+      throw new BadRequestException('Age must be a positive number');
+    }
+
     this.counter++;
-
-    const newUser = {
-      id: this.counter + 1,
-      name: name, 
-      surname: surname,
-      age: age,
+    const newUser: User = {
+      id: this.counter,
+      name,
+      surname,
+      age,
     };
-    
+
     this.users.push(newUser);
+    return newUser;
   }
 
-  @Get('/api/pokemon')
+  @Get('pokemon')
   async getPokemon(): Promise<any> {
-    const { data } = await firstValueFrom (
-      await this.appService.getPokemonByName('ditto'),
-    )
-    return data;
+    try {
+      const response = await this.appService.getPokemonByName('ditto');
+      const { data } = await firstValueFrom(response);
+      return data;
+    } catch (error) {
+      throw new BadRequestException('Failed to fetch Pokemon data');
+    }
   }
-
-
-
 }
 
 

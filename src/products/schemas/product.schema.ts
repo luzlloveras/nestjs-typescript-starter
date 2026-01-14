@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
@@ -6,25 +5,24 @@ export type ProductDocument = HydratedDocument<Product>;
 
 @Schema()
 export class Product {
-  //decorador que define una propiedad de un documento
   @Prop({ type: String, required: true })
-  //nombre_propiedad: tipo de dato de la propiedad
-  name: string;
+  name!: string;
 
   @Prop({ type: Number, required: true })
-  price: number;
+  price!: number;
 
   @Prop({ type: String, required: true })
-  currency: string;
+  currency!: string;
 
   @Prop({ type: [String], required: true })
-  categories: string[];
+  categories!: string[];
 
   @Prop({ type: Object, required: true })
-  measurements: {
+  measurements!: {
     height: number;
     width: number;
     weight: number;
   };
 }
+
 export const ProductSchema = SchemaFactory.createForClass(Product);
