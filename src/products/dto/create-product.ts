@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsArray, IsObject, IsNotEmpty, Min, ArrayMinSize, ValidateNested } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsObject, Min, ArrayMinSize, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -22,7 +22,6 @@ class MeasurementsDto {
 export class CreateProductDto {
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
   name!: string;
 
   @ApiProperty()
@@ -32,7 +31,6 @@ export class CreateProductDto {
 
   @ApiProperty()
   @IsString()
-  @IsNotEmpty()
   currency!: string;
 
   @ApiProperty()

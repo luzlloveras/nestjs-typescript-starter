@@ -53,14 +53,9 @@ export class AppController {
 
   @Get('users/:id')
   getUsersById(@Param('id') id: string): User {
-    const userId = parseInt(id, 10);
-    if (isNaN(userId)) {
-      throw new BadRequestException('Invalid user ID');
-    }
-
-    const user = this.users.find((u) => u.id === userId);
+    const user = this.users.find((u) => u.id === parseInt(id, 10));
     if (!user) {
-      throw new BadRequestException(`User with ID ${id} not found`);
+      throw new BadRequestException('User not found');
     }
     return user;
   }
@@ -68,37 +63,20 @@ export class AppController {
   @Post('users')
   @HttpCode(HttpStatus.CREATED)
   createUser(@Body() userData: CreateUserDto): User {
-    const { name, surname, age } = userData;
-
-    if (!name || !surname || !age) {
-      throw new BadRequestException('Invalid data: name, surname, and age are required');
-    }
-
-    if (typeof age !== 'number' || age < 0) {
-      throw new BadRequestException('Age must be a positive number');
-    }
-
     this.counter++;
     const newUser: User = {
       id: this.counter,
-      name,
-      surname,
-      age,
+      ...userData,
     };
-
     this.users.push(newUser);
     return newUser;
   }
 
   @Get('pokemon')
   async getPokemon(): Promise<any> {
-    try {
-      const response = await this.appService.getPokemonByName('ditto');
-      const { data } = await firstValueFrom(response);
-      return data;
-    } catch (error) {
-      throw new BadRequestException('Failed to fetch Pokemon data');
-    }
+    const response = await this.appService.getPokemonByName('ditto');
+    const { data } = await firstValueFrom(response);
+    return data;
   }
 }
 

@@ -17,11 +17,10 @@ import { ProductsModule } from './products/products.module';
       envFilePath: ['.env.local', '.env'],
     }),
     MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('database.uri'),
-      }),
       inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri: config.get<string>('database.uri'),
+      }),
     }),
     ThrottlerModule.forRoot([
       {

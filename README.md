@@ -9,9 +9,7 @@ npm install
 npm run start:dev
 ```
 
-You'll need MongoDB. Options:
-- **MongoDB Atlas (recommended)**: Free cloud database, no installation needed. See `SETUP_ATLAS.md`
-- **Local MongoDB**: Install and run locally (requires ~500MB disk space)
+You'll need MongoDB. Use MongoDB Atlas (free cloud) or install locally.
 
 ## Environment Variables
 
