@@ -47,6 +47,12 @@ Main endpoints:
 - `PUT /api/products/:id` - update
 - `DELETE /api/products/:id` - delete
 
+## Docs
+
+- Swagger UI: http://localhost:3000/api/docs
+- Redoc: http://localhost:3000/redoc
+- OpenAPI JSON: http://localhost:3000/openapi.json
+
 ## Tests
 
 ```bash
